@@ -46,6 +46,7 @@ import { ArtworkCard } from './components/ArtworkCard';
 import { ArtworkFramePreview } from './components/ArtworkFramePreview';
 import { UploadModal } from './components/UploadModal';
 import { GoogleFormsManager } from './components/GoogleFormsManager';
+import { MarketingPlanner } from './components/MarketingPlanner';
 import { 
   downloadSpecSheet, 
   exportFramedArtwork, 
@@ -63,7 +64,7 @@ export default function App() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'workspace' | 'google-forms'>('workspace');
+  const [activeTab, setActiveTab] = useState<'workspace' | 'google-forms' | 'marketing'>('workspace');
   
   // Filtering and searching states
   const [searchTerm, setSearchTerm] = useState('');
@@ -1418,9 +1419,13 @@ export default function App() {
         </section>
       </div>
     </main>
-      ) : (
+      ) : activeTab === 'google-forms' ? (
         <main className="max-w-7xl mx-auto px-6 sm:px-8 py-8 flex-grow w-full">
           <GoogleFormsManager onImportArtwork={handleImportGoogleFormArtwork} />
+        </main>
+      ) : (
+        <main className="max-w-7xl mx-auto px-6 sm:px-8 py-8 flex-grow w-full">
+          <MarketingPlanner />
         </main>
       )}
 

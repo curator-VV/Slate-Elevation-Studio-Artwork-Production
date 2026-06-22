@@ -14,8 +14,8 @@ interface HeaderProps {
   setSearchTerm: (term: string) => void;
   statusFilter: string;
   setStatusFilter: (status: string) => void;
-  activeTab: 'workspace' | 'google-forms';
-  setActiveTab: (tab: 'workspace' | 'google-forms') => void;
+  activeTab: 'workspace' | 'google-forms' | 'marketing';
+  setActiveTab: (tab: 'workspace' | 'google-forms' | 'marketing') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="text-gray-500">Internal Workspace</span>
             <span className="text-gray-300">/</span>
             <span className="text-blue-600 font-medium">
-              {activeTab === 'workspace' ? 'Production Desk' : 'Forms Sync Desk'}
+              {activeTab === 'workspace' ? 'Production Desk' : activeTab === 'google-forms' ? 'Forms Sync Desk' : 'Marketing Planner'}
             </span>
           </div>
 
@@ -62,10 +62,10 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Modern Tab Bar */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 border-b border-gray-150 flex items-center gap-8 mb-6">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 border-b border-gray-150 flex items-center gap-8 mb-6 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveTab('workspace')}
-          className={`pb-3 font-sans text-xs font-bold tracking-wider uppercase border-b-2 cursor-pointer transition-all ${
+          className={`pb-3 font-sans text-xs font-bold tracking-wider uppercase border-b-2 cursor-pointer transition-all whitespace-nowrap ${
             activeTab === 'workspace' 
               ? 'border-blue-600 text-blue-600 font-extrabold' 
               : 'border-transparent text-gray-400 hover:text-gray-600'
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           onClick={() => setActiveTab('google-forms')}
-          className={`pb-3 font-sans text-xs font-bold tracking-wider uppercase border-b-2 cursor-pointer transition-all flex items-center gap-1.5 ${
+          className={`pb-3 font-sans text-xs font-bold tracking-wider uppercase border-b-2 cursor-pointer transition-all flex items-center gap-1.5 whitespace-nowrap ${
             activeTab === 'google-forms' 
               ? 'border-blue-600 text-blue-600 font-extrabold' 
               : 'border-transparent text-gray-400 hover:text-gray-600'
@@ -83,6 +83,16 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Sparkles className="w-3.5 h-3.5" />
           Google Forms Dispatch
+        </button>
+        <button
+          onClick={() => setActiveTab('marketing')}
+          className={`pb-3 font-sans text-xs font-bold tracking-wider uppercase border-b-2 cursor-pointer transition-all flex items-center gap-1.5 whitespace-nowrap ${
+            activeTab === 'marketing' 
+              ? 'border-blue-600 text-blue-600 font-extrabold' 
+              : 'border-transparent text-gray-400 hover:text-gray-600'
+          }`}
+        >
+          📢 Marketing Planner
         </button>
       </div>
 
