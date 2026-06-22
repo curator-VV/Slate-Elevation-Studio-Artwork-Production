@@ -71,6 +71,12 @@ export interface MarketingAsset {
   duration_sec?: number;
   created_at: string;
   updated_at: string;
+  
+  category_tag?: string;
+  creative_brief_url?: string;
+  briefing_notes?: string;
+  theme?: string;
+  focus_context?: string;
 }
 
 export interface SocialPost {

@@ -722,3 +722,41 @@ export async function lookupAddressCoordinates(address: string, apiKey: string):
   throw new Error('Could not find geographic coordinates for the given address.');
 }
 
+export async function generateMarketingCaption(
+  theme: string,
+  focusText: string,
+  platform: string,
+  apiKey: string
+): Promise<string> {
+  const url = getApiUrl('v1beta/models/gemini-2.5-flash:generateContent', apiKey);
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{
+          text: `You are an expert luxury brand copywriter. Write a highly polished, professional, and on-brand social media caption for Slate Elevation Studio, which creates premium, minimalist architectural art, home watercolors, pencil sketch portraits, and custom museum-quality framing craftsmanship.
+
+Target Platform: ${platform}
+Brand/Monograph Theme: ${theme}
+Focus Context: ${focusText}
+
+Write a caption that matches this luxury aesthetic (refined, sophisticated, clean, minimalist, design-focused). Do NOT sound overly salesy or generic. Keep it elegant. Include 3-5 relevant high-end hashtags (e.g. #SlateElevation, #MinimalistDesign, #ArchitecturalArt, #FramingCraftsmanship). Do not output any markdown formatting (like bolding or headers), other text, or explanation. Only return the final caption itself.`
+        }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Failed to generate caption: ${errText}`);
+  }
+
+  const data = await response.json();
+  const caption = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!caption) throw new Error('No caption was returned by Gemini.');
+  return caption.trim();
+}
+
+
