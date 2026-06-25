@@ -74,10 +74,18 @@ export function GoogleFormsManager({ onImportArtwork }: GoogleFormsManagerProps)
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Google Form config state
-  const [formUrl, setFormUrl] = useState('https://docs.google.com/forms/d/e/1FAIpQLSfZVXZNS4nVPhaMX-zkHLo2yUtBDO7v1JYUVMvO4-b-pd0BDQ/viewform?usp=header');
+  // Google Form config state (loaded from local storage, fallback to the correct edit URL)
+  const [formUrl, setFormUrl] = useState(() => 
+    localStorage.getItem('slate_intake_form_url') || 
+    'https://docs.google.com/forms/d/1y7t-rcwyizKFewg6TO3wG6a2ITGgSo3jJbwlA_n6mo/edit'
+  );
   const [formMetadata, setFormMetadata] = useState<FormMetadata | null>(null);
   const [responses, setResponses] = useState<FormResponseItem[]>([]);
+  
+  // Save form URL to local storage when changed
+  useEffect(() => {
+    localStorage.setItem('slate_intake_form_url', formUrl);
+  }, [formUrl]);
   
   // Custom expandable panels
   const [showMapping, setShowMapping] = useState(false);
