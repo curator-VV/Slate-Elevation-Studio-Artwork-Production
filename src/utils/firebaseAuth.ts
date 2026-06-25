@@ -6,8 +6,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
-// Request Workspace Forms scope
-provider.addScope('https://www.googleapis.com/auth/forms');
+// Request Google Forms scopes and Drive scope to download customer photos
+provider.addScope('https://www.googleapis.com/auth/forms.body');
+provider.addScope('https://www.googleapis.com/auth/forms.responses.readonly');
+provider.addScope('https://www.googleapis.com/auth/drive.readonly');
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;

@@ -217,7 +217,7 @@ export function GoogleFormsManager({ onImportArtwork }: GoogleFormsManagerProps)
 
       if (!metaRes.ok) {
         const errorData = await metaRes.json().catch(() => ({}));
-        console.error('Meta fetch error details:', errorData);
+        console.error('Meta fetch error details (JSON):', JSON.stringify(errorData, null, 2));
         
         let customMessage = `Google API returned status ${metaRes.status}. `;
         if (metaRes.status === 404) {
