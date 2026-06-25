@@ -4,16 +4,17 @@
  */
 
 import React from 'react';
-import { Clock, Check, AlertCircle } from 'lucide-react';
+import { Clock, Check, AlertCircle, Trash2 } from 'lucide-react';
 import { Artwork } from '../types';
 
 interface ArtworkCardProps {
   artwork: Artwork;
   isSelected: boolean;
   onClick: () => void;
+  onDelete?: (id: string) => void;
 }
 
-export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, isSelected, onClick }) => {
+export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, isSelected, onClick, onDelete }) => {
   // Get small class-based frame classes for mini mock visual card representation
   const getMiniFrameClass = () => {
     switch (artwork.frame) {
@@ -82,6 +83,19 @@ export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, isSelected, o
     >
       {/* Framed Image Mat Container */}
       <div className="bg-[#fcfbf9] p-4 flex items-center justify-center border-b border-[#e9e8e7] overflow-hidden aspect-[4/3] relative">
+        {/* Floating Delete Button */}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(artwork.id);
+            }}
+            className="absolute right-2 top-2 p-1.5 bg-white hover:bg-red-50 text-gray-400 hover:text-red-650 rounded-full border border-gray-200 transition-colors shadow-xs z-10 opacity-0 group-hover:opacity-100 max-sm:opacity-100"
+            title="Delete Artwork"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
         <div className={`w-full max-w-[170px] aspect-square flex items-center justify-center transition-all bg-[#fdfcfb] shadow-sm overflow-hidden ${getMiniFrameClass()} ${getMiniMatPadding()}`}>
           <img
             src={artwork.imageData}

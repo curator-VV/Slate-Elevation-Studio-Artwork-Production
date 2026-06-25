@@ -88,7 +88,7 @@ export const ArtworkFramePreview: React.FC<ArtworkFramePreviewProps> = ({ artwor
 
   const line1 = artwork.textLine1Override || defaultLine1;
   const line2 = artwork.textLine2Override || artwork.coordinates || '37.8972° N, 122.5311° W';
-  const line3 = artwork.textLine3Override || (artwork.estDate ? `EST. ${artwork.estDate.replace(/^EST\.\s*/i, '')}` : '') || '';
+  const line3 = artwork.textLine3Override || (artwork.estDate ? `EST. ${String(artwork.estDate).replace(/^EST\.\s*/i, '')}` : '') || '';
 
   return (
     <div className="flex flex-col items-center justify-center py-6 px-4 bg-[#f5f3f3] rounded-lg border border-[#e9e8e7] overflow-hidden min-h-[400px] sm:min-h-[500px] w-full">

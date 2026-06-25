@@ -351,6 +351,16 @@ export default function App() {
   useEffect(() => {
     async function loadData() {
       try {
+        if (urlParams.get('reset') === 'true') {
+          // Clear IndexedDB store
+          const loaded = await getAllArtworks();
+          for (const item of loaded) {
+            await deleteArtwork(item.id);
+          }
+          // Remove ?reset=true from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         let loaded = await getAllArtworks();
         if (loaded.length === 0) {
           // Pre-populate with beautiful initial samples if DB is empty
@@ -460,7 +470,7 @@ export default function App() {
   // Handle direct file download for raw files
   const handleDownloadOriginal = () => {
     if (!selectedArtwork) return;
-    const fallbackName = `original-${selectedArtwork.referenceNumber}-${selectedArtwork.title.replace(/\s+/g, '_')}.jpg`;
+    const fallbackName = `original-${selectedArtwork.referenceNumber}-${(selectedArtwork.title || '').replace(/\s+/g, '_')}.jpg`;
     downloadFile(selectedArtwork.imageData, fallbackName);
   };
 
@@ -625,6 +635,13 @@ export default function App() {
                       artwork={art}
                       isSelected={selectedArtworkId === art.id}
                       onClick={() => selectArtworkOnMobile(art.id)}
+                      onDelete={async (id) => {
+                        const artToDelete = artworks.find(a => a.id === id);
+                        const title = artToDelete ? artToDelete.title : 'this artwork';
+                        if (confirm(`Are you sure you want to delete "${title}"?`)) {
+                          await handleDeleteArtwork(id);
+                        }
+                      }}
                     />
                   ))}
                 </div>
@@ -672,7 +689,7 @@ export default function App() {
                       </div>
                       
                       <h2 className="text-sm font-sans font-extrabold text-gray-900 truncate leading-snug">
-                        WORKSTATION / {selectedArtwork.title.toUpperCase()}
+                        WORKSTATION / {(selectedArtwork.title || 'Untitled').toUpperCase()}
                       </h2>
                     </div>
 
@@ -957,9 +974,9 @@ export default function App() {
                             onChange={(e) => handleUpdateActiveSpecs({ textLine1Override: e.target.value })}
                             placeholder={
                               selectedArtwork.address 
-                                ? (selectedArtwork.cityState 
+                                ? (selectedArtwork.cityState && typeof selectedArtwork.cityState === 'string'
                                     ? `${selectedArtwork.address} | ${selectedArtwork.cityState.split(',')[0].trim()}`.toUpperCase()
-                                    : selectedArtwork.address.toUpperCase())
+                                    : String(selectedArtwork.address).toUpperCase())
                                 : '1450 HILLSIDE AVENUE'
                             }
                             className="w-full bg-white border border-gray-250 rounded px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#181919]"
@@ -987,7 +1004,7 @@ export default function App() {
                             onChange={(e) => handleUpdateActiveSpecs({ textLine3Override: e.target.value })}
                             placeholder={
                               (selectedArtwork.estDate 
-                                ? `EST. ${selectedArtwork.estDate.replace(/^EST\.\s*/i, '')}`.toUpperCase()
+                                ? `EST. ${String(selectedArtwork.estDate).replace(/^EST\.\s*/i, '')}`.toUpperCase()
                                 : '') || 'EST. 1961'
                             }
                             className="w-full bg-white border border-gray-250 rounded px-2.5 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#181919]"
