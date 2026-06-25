@@ -47,6 +47,7 @@ import { ArtworkFramePreview } from './components/ArtworkFramePreview';
 import { UploadModal } from './components/UploadModal';
 import { GoogleFormsManager } from './components/GoogleFormsManager';
 import { MarketingPlanner } from './components/MarketingPlanner';
+import { CustomerReviewPortal } from './components/CustomerReviewPortal';
 import { 
   downloadSpecSheet, 
   exportFramedArtwork, 
@@ -60,7 +61,26 @@ import {
   getAIArtworkPrompt
 } from './utils/geminiApi';
 
+// Parse search parameters globally for stateless customer review portal routing
+const urlParams = new URLSearchParams(window.location.search);
+const isReviewMode = urlParams.get('review') === 'true';
+const reviewOrder = urlParams.get('order') || '';
+const reviewName = urlParams.get('name') || '';
+const reviewMockup = urlParams.get('mockup') || '';
+const reviewWebhook = urlParams.get('webhook') || (import.meta.env.VITE_CUSTOMER_PORTAL_WEBHOOK || '');
+
 export default function App() {
+  if (isReviewMode) {
+    return (
+      <CustomerReviewPortal 
+        orderNumber={reviewOrder}
+        customerName={reviewName}
+        mockupUrl={reviewMockup}
+        webhookUrl={reviewWebhook}
+      />
+    );
+  }
+
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -84,6 +104,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [isCopyingImage, setIsCopyingImage] = useState(false);
   const [imageCopied, setImageCopied] = useState(false);
+  const [reviewCopied, setReviewCopied] = useState(false);
   const [isRosterExpanded, setIsRosterExpanded] = useState(false);
 
   const handleUploadCustomRender = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -474,6 +495,21 @@ export default function App() {
     } finally {
       setIsCopyingImage(false);
     }
+  };
+
+  // Handle generating and copying customer review link to clipboard
+  const handleCopyReviewLink = () => {
+    if (!selectedArtwork) return;
+    const orderNum = selectedArtwork.referenceNumber;
+    const clientName = selectedArtwork.clientName;
+    const mockupUrl = selectedArtwork.prodigiMockupUrl || '';
+    
+    // Construct review URL
+    const reviewUrl = `${window.location.origin}${window.location.pathname}?review=true&order=${orderNum}&name=${encodeURIComponent(clientName)}&mockup=${encodeURIComponent(mockupUrl)}`;
+    
+    navigator.clipboard.writeText(reviewUrl);
+    setReviewCopied(true);
+    setTimeout(() => setReviewCopied(false), 2000);
   };
 
   // Quick reset database back to factory samples
@@ -1291,6 +1327,79 @@ export default function App() {
                     </div>
                   </div>
                 )}
+
+                {/* CUSTOMER PORTAL REVIEW LINK CONFIG */}
+                <div className="border-t border-gray-100 pt-8 space-y-4">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      Customer Review Portal
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 bg-[#faf9f8] border border-gray-200 p-4 rounded-lg">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-450 mb-1">
+                        Prodigi Framed Mockup Image URL
+                      </label>
+                      <input
+                        type="text"
+                        value={selectedArtwork.prodigiMockupUrl || ''}
+                        onChange={(e) => handleUpdateActiveSpecs({ prodigiMockupUrl: e.target.value })}
+                        placeholder="e.g. https://images.unsplash.com/photo-..."
+                        className="w-full text-xs p-2.5 border border-gray-300 rounded focus:border-[#1c1c1c] focus:ring-1 focus:ring-[#1c1c1c] bg-white text-gray-800"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleCopyReviewLink}
+                      disabled={!selectedArtwork.prodigiMockupUrl}
+                      type="button"
+                      className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 disabled:opacity-40 disabled:hover:bg-white text-xs font-semibold uppercase tracking-wider py-3.5 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {reviewCopied ? (
+                        <>
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Copied Review Link!
+                        </>
+                      ) : (
+                        <>
+                          <ExternalLink className="w-3.5 h-3.5" /> Copy Customer Review Link
+                        </>
+                      )}
+                    </button>
+
+                    <div className="pt-3 border-t border-gray-200 space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-450 mb-1">
+                          Review Status
+                        </label>
+                        <select
+                          value={selectedArtwork.customerApprovalStatus || 'Pending'}
+                          onChange={(e) => handleUpdateActiveSpecs({ customerApprovalStatus: e.target.value as any })}
+                          className="w-full text-xs p-2 border border-gray-300 rounded focus:border-[#1c1c1c] focus:ring-1 focus:ring-[#1c1c1c] bg-white text-gray-800"
+                        >
+                          <option value="Pending">Pending Review</option>
+                          <option value="Approved">Approved by Customer</option>
+                          <option value="Revision Requested">Revision Requested</option>
+                        </select>
+                      </div>
+
+                      {selectedArtwork.customerApprovalStatus === 'Revision Requested' && (
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-450 mb-1">
+                            Revision Notes
+                          </label>
+                          <textarea
+                            value={selectedArtwork.customerRevisionNotes || ''}
+                            onChange={(e) => handleUpdateActiveSpecs({ customerRevisionNotes: e.target.value })}
+                            placeholder="Enter revision comments..."
+                            rows={3}
+                            className="w-full text-xs p-2.5 border border-gray-300 rounded focus:border-[#1c1c1c] focus:ring-1 focus:ring-[#1c1c1c] bg-white text-gray-850"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
                 {/* 3. FINAL SIGN-OFF / ACTION BOARD */}
                 <div className="border-t border-gray-100 pt-8 space-y-4">

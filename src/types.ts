@@ -50,6 +50,11 @@ export interface Artwork {
   aiSketchImage?: string; // Cache for AI-generated sketch image
   filterWatercolorImage?: string; // Cache for photo-filtered watercolor image
   filterSketchImage?: string; // Cache for photo-filtered sketch image
+
+  // Customer portal fields
+  prodigiMockupUrl?: string; // URL of the Prodigi mockup image
+  customerApprovalStatus?: 'Pending' | 'Approved' | 'Revision Requested'; // Approval status
+  customerRevisionNotes?: string; // Notes/Revision comments
 }
 
 export interface Campaign {
